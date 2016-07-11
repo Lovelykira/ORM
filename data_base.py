@@ -21,8 +21,8 @@ class DB:
         attributes_str = ""
         for key, value in attributes.items():
             if attributes_str:
-                attributes_str += ", "
-            attributes_str += key + " " + value
+                attributes_str = "{}, ".format(attributes_str)
+            attributes_str = "{}{} {}".format(attributes_str, key, value)
         sql_query = 'CREATE TABLE IF NOT EXISTS {} ({});'.format(cls_name, attributes_str)
         print(sql_query)
         return self.execute(sql_query)
@@ -33,7 +33,7 @@ class DB:
         values = []
         for column in columns:
             if isinstance(getattr(obj, column), str):
-                values.append('"' + getattr(obj, column) + '"')
+                values.append("'{}'".format(getattr(obj, column)))
             else:
                 values.append(str(getattr(obj, column)))
         columns = ', '.join(columns)
@@ -47,7 +47,7 @@ class DB:
         parameters = ""
         for key, value in kwargs.items():
             if isinstance(value, str):
-                value='"' + value + '"'
+                value="'{}'".format(value)
             if "__" in key:
                 operator = ""
                 if 'contains' in key.split("__")[1]:
@@ -61,11 +61,11 @@ class DB:
                         operator += '='
                 if parameters:
                     parameters += " AND "
-                parameters += key.split("__")[0] + " " + operator + " " + str(value)
+                parameters = "{}{} {} {}".format(parameters, key.split("__")[0], operator, str(value))
             else:
                 if parameters:
                     parameters += " AND "
-                parameters += key + " = " + str(value)
+                parameters = "{}{} = {}".format(parameters, key, str(value))
 
         if len(kwargs) != 0:
             sql_query = 'SELECT * FROM {} WHERE {};'.format(table_name, parameters)
